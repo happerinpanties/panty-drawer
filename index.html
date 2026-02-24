@@ -97,6 +97,11 @@ async function loadPanties() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
+if (!data || data.length === 0) {
+  grid.innerHTML = '<p>No items found.</p>';
+  return;
+}
+
   data.forEach(p => {
     grid.innerHTML += `
       <div>
