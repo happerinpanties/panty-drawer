@@ -24,18 +24,18 @@
 <div class="grid" id="grid"></div>
 
 <script>
-const supabase = window.supabase.createClient(
+const client = window.supabase.createClient(
   'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
   'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
 );
 
 async function loadFilters() {
   // Load brands
-  const { data: brands } = await supabase.from('brands').select('id, name').order('name');
-  const { data: styles } = await supabase.from('styles').select('id, name').order('name');
-  const { data: fabrics } = await supabase.from('fabrics').select('id, name').order('name');
+  const { data: brands } = await client.from('brands').select('id, name').order('name');
+  const { data: styles } = await client.from('styles').select('id, name').order('name');
+  const { data: fabrics } = await client.from('fabrics').select('id, name').order('name');
 
-  const { data: colors } = await supabase
+  const { data: colors } = await client
     .from('panties')
     .select('color')
     .order('color');
@@ -70,7 +70,7 @@ function populateColorSelect(colors) {
 }
 
 async function loadPanties() {
-  let query = supabase
+  let query = client
     .from('panties')
     .select(`
       id,
