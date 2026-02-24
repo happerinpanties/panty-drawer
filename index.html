@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Panty Drawer</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    .filters { margin-bottom: 20px; display: flex; gap: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+    img { width: 100%; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<h1>Panty Drawer</h1>
+
+<div class="filters">
+  <select id="brand"></select>
+  <select id="style"></select>
+  <select id="fabric"></select>
+  <select id="color"></select>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const supabase = window.supabase.createClient(
+  'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
+  'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
+);
+
+async function loadFilters() {
+  // Load brands
+  const { data: brands } = await supabase.from('brands').select('id, name').order('name');
+  const { data: styles } = await supabase.from('styles').select('id, name').order('name');
+  const { data: fabrics } = await supabase.from('fabrics').select('id, name').order('name');
+
+  const { data: colors } = await supabase
+    .from('panties')
+    .select('color')
+    .order('color');
+
+  populateSelect('brand', brands, 'name');
+  populateSelect('style', styles, 'name');
+  populateSelect('fabric', fabrics, 'name');
+  populateColorSelect(colors);
+}
+
+function populateSelect(id, options, labelField) {
+  const select = document.getElementById(id);
+  select.innerHTML = `<option value="">All ${id}</option>`;
+
+  options.forEach(opt => {
+    select.innerHTML += `<option value="${opt.id}">${opt[labelField]}</option>`;
+  });
+
+  select.addEventListener('change', loadPanties);
+}
+
+function populateColorSelect(colors) {
+  const select = document.getElementById('color');
+  const uniqueColors = [...new Set(colors.map(c => c.color))];
+
+  select.innerHTML = `<option value="">All colors</option>`;
+  uniqueColors.forEach(color => {
+    select.innerHTML += `<option value="${color}">${color}</option>`;
+  });
+
+  select.addEventListener('change', loadPanties);
+}
+
+async function loadPanties() {
+  let query = supabase
+    .from('panties')
+    .select(`
+      id,
+      color,
+      image_url,
+      brands ( id, name ),
+      styles ( id, name ),
+      fabrics ( id, name )
+    `)
+    .eq('status', 'clean');
+
+  const brand = document.getElementById('brand').value;
+  const style = document.getElementById('style').value;
+  const fabric = document.getElementById('fabric').value;
+  const color = document.getElementById('color').value;
+
+  if (brand) query = query.eq('brand_id', brand);
+  if (style) query = query.eq('style_id', style);
+  if (fabric) query = query.eq('fabric_id', fabric);
+  if (color) query = query.eq('color', color);
+
+  const { data } = await query;
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  data.forEach(p => {
+    grid.innerHTML += `
+      <div>
+        <img src="${p.image_url}" alt="">
+      </div>
+    `;
+  });
+}
+
+loadFilters();
+loadPanties();
+</script>
+
+</body>
+</html>
