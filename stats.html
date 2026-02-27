@@ -151,14 +151,34 @@ function renderColorMonthChart(counts) {
 
   const colorsArray = Array.from(allColors);
 
-  const datasets = colorsArray.map(color => {
-    return {
-      label: color,
-      data: sortedMonths.map(month => 
-        monthColorMap[month][color] || 0
-      )
-    };
-  });
+const colorMap = {
+  Pink: "#ff6fae",
+  Purple: "#8e44ad",
+  Red: "#e74c3c",
+  White: "#ecf0f1",
+  Black: "#2c3e50",
+  Yellow: "#f1c40f",
+  Orange: "#e67e22",
+  Green: "#27ae60",
+  Blue: "#3498db",
+  Grey: "#7f8c8d",
+  "Animal Print": "#a67c52",   // tan/brown
+  Multicolor: "#9b59b6"        // vibrant purple fallback
+};
+
+const datasets = colorsArray.map(color => {
+  const bgColor = colorMap[color] || "#95a5a6"; // fallback gray
+
+  return {
+    label: color,
+    data: sortedMonths.map(month => 
+      monthColorMap[month][color] || 0
+    ),
+    backgroundColor: bgColor,
+    borderColor: bgColor,
+    borderWidth: 1
+  };
+});
 
   const ctx = document.getElementById('colorMonthChart').getContext('2d');
 
