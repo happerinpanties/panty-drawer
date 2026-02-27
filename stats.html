@@ -133,15 +133,41 @@ function renderColorMonthTable(counts) {
   const tbody = document.querySelector('#colorMonthTable tbody');
   tbody.innerHTML = '';
 
-  Object.entries(counts)
-    .sort((a,b) => b[0].localeCompare(a[0]))
-    .forEach(([key, count]) => {
-      const [yymm, color] = key.split("-");
+  const monthNames = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  const rows = Object.entries(counts).map(([key, count]) => {
+    const [yymm, color] = key.split("-");
+    const year = "20" + yymm.slice(0,2);
+    const monthIndex = parseInt(yymm.slice(2,4)) - 1;
+
+    return {
+      sortKey: yymm,             // for primary sort
+      year,
+      monthIndex,
+      monthName: monthNames[monthIndex],
+      color,
+      count
+    };
+  });
+
+  rows
+    .sort((a, b) => {
+      // 1 Sort by month descending (most recent first)
+      if (a.sortKey !== b.sortKey) {
+        return b.sortKey.localeCompare(a.sortKey);
+      }
+      // 2 Within same month, sort by count descending
+      return b.count - a.count;
+    })
+    .forEach(row => {
       tbody.innerHTML += `
         <tr>
-          <td>${yymm}</td>
-          <td>${color}</td>
-          <td>${count}</td>
+          <td>${row.monthName} ${row.year}</td>
+          <td>${row.color}</td>
+          <td>${row.count}</td>
         </tr>
       `;
     });
