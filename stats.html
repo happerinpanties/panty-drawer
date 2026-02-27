@@ -3,6 +3,7 @@
 <head>
   <title>Panty Drawer - Stats</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { font-family: Arial; padding: 20px; }
     h2 { margin-top: 40px; }
@@ -92,16 +93,7 @@
 </table>
 
 <h2>Color by Year-Month</h2>
-<table id="colorMonthTable">
-  <thead>
-    <tr>
-      <th>Year-Month</th>
-      <th>Color</th>
-      <th>Count</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<canvas id="colorMonthChart" height="120"></canvas>
 
 <script>
 const client = window.supabase.createClient(
@@ -129,48 +121,84 @@ function renderSimpleTable(tableId, counts) {
     });
 }
 
-function renderColorMonthTable(counts) {
-  const tbody = document.querySelector('#colorMonthTable tbody');
-  tbody.innerHTML = '';
-
+function renderColorMonthChart(counts) {
   const monthNames = [
     "January","February","March","April","May","June",
     "July","August","September","October","November","December"
   ];
 
-  const rows = Object.entries(counts).map(([key, count]) => {
+  const monthColorMap = {};
+  const allColors = new Set();
+
+  // Rebuild structure into { month: { color: count } }
+  Object.entries(counts).forEach(([key, count]) => {
     const [yymm, color] = key.split("-");
     const year = "20" + yymm.slice(0,2);
     const monthIndex = parseInt(yymm.slice(2,4)) - 1;
+    const monthLabel = `${monthNames[monthIndex]} ${year}`;
 
+    if (!monthColorMap[monthLabel]) {
+      monthColorMap[monthLabel] = {};
+    }
+
+    monthColorMap[monthLabel][color] = count;
+    allColors.add(color);
+  });
+
+  // Sort months descending (most recent first)
+  const sortedMonths = Object.keys(monthColorMap)
+    .sort((a, b) => new Date(b) - new Date(a));
+
+  const colorsArray = Array.from(allColors);
+
+  const datasets = colorsArray.map(color => {
     return {
-      sortKey: yymm,             // for primary sort
-      year,
-      monthIndex,
-      monthName: monthNames[monthIndex],
-      color,
-      count
+      label: color,
+      data: sortedMonths.map(month => 
+        monthColorMap[month][color] || 0
+      )
     };
   });
 
-  rows
-    .sort((a, b) => {
-      // 1 Sort by month descending (most recent first)
-      if (a.sortKey !== b.sortKey) {
-        return b.sortKey.localeCompare(a.sortKey);
+  const ctx = document.getElementById('colorMonthChart').getContext('2d');
+
+  if (window.colorMonthChartInstance) {
+    window.colorMonthChartInstance.destroy();
+  }
+
+window.colorMonthChartInstance = new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: sortedMonths,
+    datasets: datasets
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      tooltip: {
+        mode: 'index',
+        intersect: false
       }
-      // 2 Within same month, sort by count descending
-      return b.count - a.count;
-    })
-    .forEach(row => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${row.monthName} ${row.year}</td>
-          <td>${row.color}</td>
-          <td>${row.count}</td>
-        </tr>
-      `;
-    });
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    scales: {
+      x: {
+        stacked: true
+      },
+      y: {
+        stacked: true,
+        beginAtZero: true,
+        ticks: {
+          precision: 0
+        }
+      }
+    }
+  }
+});
 }
 
 /* ---------------------------
@@ -314,7 +342,7 @@ async function loadWearCounts() {
   renderSimpleTable("styleCountTable", styleCounts);
   renderSimpleTable("brandCountTable", brandCounts);
   renderSimpleTable("fabricCountTable", fabricCounts);
-  renderColorMonthTable(colorMonthCounts);
+  renderColorMonthChart(colorMonthCounts);
 }
 
 /* ---------------------------
