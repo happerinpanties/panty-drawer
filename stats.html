@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Panty Drawer - Stats</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    h2 { margin-top: 40px; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th { background-color: #f5f5f5; }
+  </style>
+</head>
+<body>
+
+<h1>Mood & Wear Stats</h1>
+
+<h2>Color by Day Rating</h2>
+<table id="colorTable">
+  <thead>
+    <tr>
+      <th>Day Rating</th>
+      <th>Color</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>State by Day Rating</h2>
+<table id="stateTable">
+  <thead>
+    <tr>
+      <th>Day Rating</th>
+      <th>State</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const client = window.supabase.createClient(
+  'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
+  'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
+);
+
+async function loadColorStats() {
+  const { data, error } = await client
+    .from('wear_mood')
+    .select(`
+      day_rating,
+      wear_history (
+        panties (
+          color
+        )
+      )
+    `);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const counts = {};
+
+  data.forEach(row => {
+    const rating = row.day_rating;
+    const color = row.wear_history?.panties?.color;
+
+    if (!rating || !color) return;
+
+    const key = rating + "-" + color;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  const tbody = document.querySelector('#colorTable tbody');
+  tbody.innerHTML = '';
+
+  Object.entries(counts)
+    .sort((a,b) => b[0].localeCompare(a[0]))
+    .forEach(([key, count]) => {
+      const [rating, color] = key.split("-");
+      tbody.innerHTML += `
+        <tr>
+          <td>${rating}</td>
+          <td>${color}</td>
+          <td>${count}</td>
+        </tr>
+      `;
+    });
+}
+
+async function loadStateStats() {
+  const { data, error } = await client
+    .from('wear_mood')
+    .select('day_rating, state')
+    .not('state', 'is', null);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const counts = {};
+
+  data.forEach(row => {
+    const key = row.day_rating + "-" + row.state;
+    counts[key] = (counts[key] || 0) + 1;
+  });
+
+  const tbody = document.querySelector('#stateTable tbody');
+  tbody.innerHTML = '';
+
+  Object.entries(counts)
+    .sort((a,b) => b[0].localeCompare(a[0]))
+    .forEach(([key, count]) => {
+      const [rating, state] = key.split("-");
+      tbody.innerHTML += `
+        <tr>
+          <td>${rating}</td>
+          <td>${state}</td>
+          <td>${count}</td>
+        </tr>
+      `;
+    });
+}
+
+loadColorStats();
+loadStateStats();
+</script>
+
+</body>
+</html>
