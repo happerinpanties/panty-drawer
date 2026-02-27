@@ -66,9 +66,12 @@ async function loadColorStats() {
     `);
 
   if (error) {
-    console.error(error);
-    return;
-  }
+  console.error("State stats error:", error);
+  alert("State stats error — check console");
+  return;
+}
+
+console.log("State stats data:", data);
 
   const counts = {};
 
@@ -106,9 +109,12 @@ async function loadStateStats() {
     .not('state', 'is', null);
 
   if (error) {
-    console.error(error);
-    return;
-  }
+  console.error("State stats error:", error);
+  alert("State stats error — check console");
+  return;
+}
+
+console.log("State stats data:", data);
 
   const counts = {};
 
