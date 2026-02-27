@@ -109,6 +109,48 @@ const client = window.supabase.createClient(
   'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
 );
 
+/* ---------------------------
+   Helper Render Functions
+--------------------------- */
+
+function renderSimpleTable(tableId, counts) {
+  const tbody = document.querySelector(`#${tableId} tbody`);
+  tbody.innerHTML = '';
+
+  Object.entries(counts)
+    .sort((a,b) => b[1] - a[1])
+    .forEach(([label, count]) => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${label}</td>
+          <td>${count}</td>
+        </tr>
+      `;
+    });
+}
+
+function renderColorMonthTable(counts) {
+  const tbody = document.querySelector('#colorMonthTable tbody');
+  tbody.innerHTML = '';
+
+  Object.entries(counts)
+    .sort((a,b) => b[0].localeCompare(a[0]))
+    .forEach(([key, count]) => {
+      const [yymm, color] = key.split("-");
+      tbody.innerHTML += `
+        <tr>
+          <td>${yymm}</td>
+          <td>${color}</td>
+          <td>${count}</td>
+        </tr>
+      `;
+    });
+}
+
+/* ---------------------------
+   Mood: Color by Day Rating
+--------------------------- */
+
 async function loadColorStats() {
   const { data, error } = await client
     .from('wear_mood')
@@ -122,12 +164,9 @@ async function loadColorStats() {
     `);
 
   if (error) {
-  console.error("State stats error:", error);
-  alert("State stats error — check console");
-  return;
-}
-
-console.log("State stats data:", data);
+    console.error("Color stats error:", error);
+    return;
+  }
 
   const counts = {};
 
@@ -158,6 +197,10 @@ console.log("State stats data:", data);
     });
 }
 
+/* ---------------------------
+   Mood: State by Day Rating
+--------------------------- */
+
 async function loadStateStats() {
   const { data, error } = await client
     .from('wear_mood')
@@ -165,12 +208,9 @@ async function loadStateStats() {
     .not('state', 'is', null);
 
   if (error) {
-  console.error("State stats error:", error);
-  alert("State stats error — check console");
-  return;
-}
-
-console.log("State stats data:", data);
+    console.error("State stats error:", error);
+    return;
+  }
 
   const counts = {};
 
@@ -195,6 +235,10 @@ console.log("State stats data:", data);
       `;
     });
 }
+
+/* ---------------------------
+   Wear Counts
+--------------------------- */
 
 async function loadWearCounts() {
   const { data, error } = await client
@@ -224,13 +268,11 @@ async function loadWearCounts() {
     const p = row.panties;
     if (!p) return;
 
-    // Basic counts
     if (p.color) colorCounts[p.color] = (colorCounts[p.color] || 0) + 1;
     if (p.styles?.name) styleCounts[p.styles.name] = (styleCounts[p.styles.name] || 0) + 1;
     if (p.brands?.name) brandCounts[p.brands.name] = (brandCounts[p.brands.name] || 0) + 1;
     if (p.fabrics?.name) fabricCounts[p.fabrics.name] = (fabricCounts[p.fabrics.name] || 0) + 1;
 
-    // YYMM grouping
     if (row.worn_at && p.color) {
       const date = new Date(row.worn_at);
       const yymm =
@@ -246,12 +288,16 @@ async function loadWearCounts() {
   renderSimpleTable("styleCountTable", styleCounts);
   renderSimpleTable("brandCountTable", brandCounts);
   renderSimpleTable("fabricCountTable", fabricCounts);
-
   renderColorMonthTable(colorMonthCounts);
 }
-loadWearCounts();
+
+/* ---------------------------
+   Initialize
+--------------------------- */
+
 loadColorStats();
 loadStateStats();
+loadWearCounts();
 
 </script>
 
