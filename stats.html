@@ -47,6 +47,62 @@
   <tbody></tbody>
 </table>
 
+<h2>Count by Color</h2>
+<table id="colorCountTable">
+  <thead>
+    <tr>
+      <th>Color</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Count by Style</h2>
+<table id="styleCountTable">
+  <thead>
+    <tr>
+      <th>Style</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Count by Brand</h2>
+<table id="brandCountTable">
+  <thead>
+    <tr>
+      <th>Brand</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Count by Fabric</h2>
+<table id="fabricCountTable">
+  <thead>
+    <tr>
+      <th>Fabric</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h2>Color by Year-Month</h2>
+<table id="colorMonthTable">
+  <thead>
+    <tr>
+      <th>Year-Month</th>
+      <th>Color</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
 <script>
 const client = window.supabase.createClient(
   'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
@@ -140,8 +196,63 @@ console.log("State stats data:", data);
     });
 }
 
+async function loadWearCounts() {
+  const { data, error } = await client
+    .from('wear_history')
+    .select(`
+      worn_at,
+      panties (
+        color,
+        styles ( name ),
+        brands ( name ),
+        fabrics ( name )
+      )
+    `);
+
+  if (error) {
+    console.error("Wear count error:", error);
+    return;
+  }
+
+  const colorCounts = {};
+  const styleCounts = {};
+  const brandCounts = {};
+  const fabricCounts = {};
+  const colorMonthCounts = {};
+
+  data.forEach(row => {
+    const p = row.panties;
+    if (!p) return;
+
+    // Basic counts
+    if (p.color) colorCounts[p.color] = (colorCounts[p.color] || 0) + 1;
+    if (p.styles?.name) styleCounts[p.styles.name] = (styleCounts[p.styles.name] || 0) + 1;
+    if (p.brands?.name) brandCounts[p.brands.name] = (brandCounts[p.brands.name] || 0) + 1;
+    if (p.fabrics?.name) fabricCounts[p.fabrics.name] = (fabricCounts[p.fabrics.name] || 0) + 1;
+
+    // YYMM grouping
+    if (row.worn_at && p.color) {
+      const date = new Date(row.worn_at);
+      const yymm =
+        String(date.getFullYear()).slice(2) +
+        String(date.getMonth() + 1).padStart(2, '0');
+
+      const key = yymm + "-" + p.color;
+      colorMonthCounts[key] = (colorMonthCounts[key] || 0) + 1;
+    }
+  });
+
+  renderSimpleTable("colorCountTable", colorCounts);
+  renderSimpleTable("styleCountTable", styleCounts);
+  renderSimpleTable("brandCountTable", brandCounts);
+  renderSimpleTable("fabricCountTable", fabricCounts);
+
+  renderColorMonthTable(colorMonthCounts);
+}
+
 loadColorStats();
 loadStateStats();
+loadWearCounts();
 </script>
 
 </body>
