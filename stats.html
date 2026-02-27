@@ -343,9 +343,35 @@ async function loadWearCounts() {
     if (!p) return;
 
     if (p.color) colorCounts[p.color] = (colorCounts[p.color] || 0) + 1;
-    if (p.styles?.name) styleCounts[p.styles.name] = (styleCounts[p.styles.name] || 0) + 1;
-    if (p.brands?.name) brandCounts[p.brands.name] = (brandCounts[p.brands.name] || 0) + 1;
-    if (p.fabrics?.name) fabricCounts[p.fabrics.name] = (fabricCounts[p.fabrics.name] || 0) + 1;
+// STYLE
+if (Array.isArray(p.styles)) {
+  p.styles.forEach(s => {
+    if (s?.name)
+      styleCounts[s.name] = (styleCounts[s.name] || 0) + 1;
+  });
+} else if (p.styles?.name) {
+  styleCounts[p.styles.name] = (styleCounts[p.styles.name] || 0) + 1;
+}
+
+// BRAND
+if (Array.isArray(p.brands)) {
+  p.brands.forEach(b => {
+    if (b?.name)
+      brandCounts[b.name] = (brandCounts[b.name] || 0) + 1;
+  });
+} else if (p.brands?.name) {
+  brandCounts[p.brands.name] = (brandCounts[p.brands.name] || 0) + 1;
+}
+
+// FABRIC
+if (Array.isArray(p.fabrics)) {
+  p.fabrics.forEach(f => {
+    if (f?.name)
+      fabricCounts[f.name] = (fabricCounts[f.name] || 0) + 1;
+  });
+} else if (p.fabrics?.name) {
+  fabricCounts[p.fabrics.name] = (fabricCounts[p.fabrics.name] || 0) + 1;
+}
 
     if (row.worn_at && p.color) {
       const date = new Date(row.worn_at);
