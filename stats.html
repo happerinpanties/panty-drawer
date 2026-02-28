@@ -48,7 +48,7 @@
   <tbody></tbody>
 </table>
 
-<h2>Count by Color</h2>
+<h2>Wear Count by Color</h2>
 <table id="colorCountTable">
   <thead>
     <tr>
@@ -59,7 +59,7 @@
   <tbody></tbody>
 </table>
 
-<h2>Count by Style</h2>
+<h2>Wear Count by Style</h2>
 <table id="styleCountTable">
   <thead>
     <tr>
@@ -70,7 +70,7 @@
   <tbody></tbody>
 </table>
 
-<h2>Count by Brand</h2>
+<h2>Wear Count by Brand</h2>
 <table id="brandCountTable">
   <thead>
     <tr>
@@ -81,7 +81,7 @@
   <tbody></tbody>
 </table>
 
-<h2>Count by Fabric</h2>
+<h2>Wear Count by Fabric</h2>
 <table id="fabricCountTable">
   <thead>
     <tr>
@@ -94,6 +94,20 @@
 
 <h2>Color by Year-Month</h2>
 <canvas id="colorMonthChart" height="120"></canvas>
+
+<h1>Current Drawer Counts</h1>
+
+<h2>Current Drawer Counts by Color</h2>
+<canvas id="drawerColorChart" height="120"></canvas>
+
+<h2>Current Drawer Counts by Style</h2>
+<canvas id="drawerStyleChart" height="120"></canvas>
+
+<h2>Current Drawer Counts by Brand</h2>
+<canvas id="drawerBrandChart" height="120"></canvas>
+
+<h2>Current Drawer Counts by Fabric</h2>
+<canvas id="drawerFabricChart" height="120"></canvas>
 
 <script>
 const client = window.supabase.createClient(
@@ -221,6 +235,38 @@ window.colorMonthChartInstance = new Chart(ctx, {
 });
 }
 
+function renderSimpleBarChart(canvasId, counts) {
+  const labels = Object.keys(counts);
+  const values = Object.values(counts);
+
+  const ctx = document
+    .getElementById(canvasId)
+    .getContext('2d');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Count',
+        data: values
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  });
+}
+
 /* ---------------------------
    Mood: Color by Day Rating
 --------------------------- */
@@ -310,6 +356,80 @@ async function loadStateStats() {
     });
 }
 
+
+/* ---------------------------
+   Drawer Counts
+--------------------------- */
+
+async function loadDrawerCounts() {
+  const { data, error } = await client
+    .from('panties')
+    .select(`
+      color,
+      styles ( name ),
+      brands ( name ),
+      fabrics ( name )
+    `)
+    .eq('status', 'Clean');
+
+  if (error) {
+    console.error('Drawer stats error:', error);
+    return;
+  }
+
+  const colorCounts = {};
+  const styleCounts = {};
+  const brandCounts = {};
+  const fabricCounts = {};
+
+  data.forEach(p => {
+    // COLOR
+    if (p.color)
+      colorCounts[p.color] = (colorCounts[p.color] || 0) + 1;
+
+    // STYLE
+    if (Array.isArray(p.styles)) {
+      p.styles.forEach(s => {
+        if (s?.name)
+          styleCounts[s.name] = (styleCounts[s.name] || 0) + 1;
+      });
+    } else if (p.styles?.name) {
+      styleCounts[p.styles.name] =
+        (styleCounts[p.styles.name] || 0) + 1;
+    }
+
+    // BRAND
+    if (Array.isArray(p.brands)) {
+      p.brands.forEach(b => {
+        if (b?.name)
+          brandCounts[b.name] =
+            (brandCounts[b.name] || 0) + 1;
+      });
+    } else if (p.brands?.name) {
+      brandCounts[p.brands.name] =
+        (brandCounts[p.brands.name] || 0) + 1;
+    }
+
+    // FABRIC
+    if (Array.isArray(p.fabrics)) {
+      p.fabrics.forEach(f => {
+        if (f?.name)
+          fabricCounts[f.name] =
+            (fabricCounts[f.name] || 0) + 1;
+      });
+    } else if (p.fabrics?.name) {
+      fabricCounts[p.fabrics.name] =
+        (fabricCounts[p.fabrics.name] || 0) + 1;
+    }
+  });
+
+  renderSimpleBarChart('drawerColorChart', colorCounts);
+  renderSimpleBarChart('drawerStyleChart', styleCounts);
+  renderSimpleBarChart('drawerBrandChart', brandCounts);
+  renderSimpleBarChart('drawerFabricChart', fabricCounts);
+}
+
+
 /* ---------------------------
    Wear Counts
 --------------------------- */
@@ -398,6 +518,7 @@ if (Array.isArray(p.fabrics)) {
 loadColorStats();
 loadStateStats();
 loadWearCounts();
+loadDrawerCounts();
 
 </script>
 
