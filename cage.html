@@ -102,6 +102,10 @@
 </table>
 
 <script>
+const client = window.supabase.createClient(
+  'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
+  'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
+);
 
 function formatTime(seconds) {
   seconds = Math.floor(seconds);
@@ -148,7 +152,7 @@ async function loadWeekStats() {
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
   startOfWeek.setHours(0,0,0,0);
 
-  const { data } = await supabase
+  const { data } = await client
     .from('focus_sessions')
     .select('*')
     .gte('start_time', startOfWeek.toISOString())
@@ -172,7 +176,7 @@ async function loadMonthStats() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0,0,0,0);
 
-  const { data } = await supabase
+  const { data } = await client
     .from('focus_sessions')
     .select('*')
     .gte('start_time', startOfMonth.toISOString())
@@ -192,7 +196,7 @@ async function loadMonthStats() {
 }
 
 async function loadTop10() {
-  const { data } = await supabase
+  const { data } = await client
     .from('focus_sessions')
     .select('*')
     .not('end_time','is',null);
@@ -217,7 +221,7 @@ async function loadTop10() {
 }
 
 async function loadMonthlySummary() {
-  const { data } = await supabase
+  const { data } = await client
     .from('focus_sessions')
     .select('*')
     .not('end_time','is',null);
