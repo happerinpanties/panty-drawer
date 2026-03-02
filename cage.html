@@ -79,13 +79,6 @@ th {
   border-radius: 8px;
   margin-bottom: 6px;
 }
-.locked {
-  color: #2e7d32;
-}
-
-.unlocked {
-  color: #c62828;
-}
   </style>
 </head>
 <body>
@@ -147,13 +140,6 @@ const client = window.supabase.createClient(
   'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
 );
 
-if (isLocked) {
-  lockStatus.textContent = "Yes";
-  lockStatus.className = "big locked";
-} else {
-  lockStatus.textContent = "No";
-  lockStatus.className = "big unlocked";
-}
 
 function formatTime(seconds) {
   seconds = Math.floor(seconds);
