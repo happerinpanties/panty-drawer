@@ -63,8 +63,9 @@ th {
 }
 
 .label {
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  font-weight: 600;   /* bolder */
+  color: #444;        /* slightly darker */
   margin-bottom: 6px;
 }
 
@@ -72,12 +73,26 @@ th {
   font-size: 22px;
   font-weight: bold;
 }
+.current-panty-wrapper {
+  max-width: 200px;   /* adjust if you want slightly bigger */
+  margin: 0 auto;
+}
 
-#currentPanty img {
-  max-height: 160px;   /* 👈 keeps it visible but not dominant */
-  width: auto;
+.current-panty-wrapper img {
+  width: 100%;
   border-radius: 8px;
-  margin-bottom: 8px;
+}
+.item-name {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+}
+.subtle-note {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 10px;
+  font-style: italic;
 }
   </style>
 </head>
@@ -102,6 +117,7 @@ th {
 
 <div class="card center" style="margin-top:20px;">
   <div class="label">Currently Wearing</div>
+  <div class="subtle-note">For Photo Verification</div>
   <div id="currentPanty"></div>
 </div>
 
@@ -318,10 +334,12 @@ async function loadCurrentPanty() {
   if (data && data.length > 0) {
     const panty = data[0].panties;
 
-    document.getElementById('currentPanty').innerHTML = `
-      <img src="${panty.image_url}" style="max-width:150px; border-radius:8px;" />
-      <div style="margin-top:8px;">${panty.name}</div>
-    `;
+   document.getElementById('currentPanty').innerHTML = `
+  <div class="current-panty-wrapper">
+    <img src="${panty.image_url}" />
+  </div>
+  <div class="item-name">${panty.name}</div>
+`;
   } else {
     document.getElementById('currentPanty').textContent = 'None found';
   }
