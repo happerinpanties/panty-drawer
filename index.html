@@ -38,6 +38,8 @@
 </select>
 </div>
 
+<div id="resultCount" style="margin-bottom:15px; font-size:14px; font-weight:500; color:#444;"></div>
+
 <div class="grid" id="grid"></div>
 
 <script>
@@ -126,7 +128,10 @@ wearCounts.forEach(w => {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
 
+const countDiv = document.getElementById('resultCount');
+
 if (!data || data.length === 0) {
+  countDiv.innerText = "0 panties";
   grid.innerHTML = '<p>No items found.</p>';
   return;
 }
@@ -145,6 +150,8 @@ data.sort((a, b) => {
 
   return 0;
 });
+
+countDiv.innerText = `${data.length} ${data.length === 1 ? 'panty' : 'panties'}`;
 
 data.forEach(p => {
   const wears = wearMap[p.id] || 0;
