@@ -734,9 +734,72 @@ renderStyleMonthChart(styleMonthCounts);
 }
 
 /* ---------------------------
-   Initialize
+   KPI Stats
 --------------------------- */
 
+async function loadKPIs() {
+
+  /* TOTAL PANTIES */
+  const { count: totalPanties } = await client
+    .from('panties')
+    .select('*', { count: 'exact', head: true });
+
+  document.getElementById('totalPanties').textContent = totalPanties ?? 0;
+
+
+  /* TOTAL WEARS */
+  const { count: totalWears } = await client
+    .from('wear_history')
+    .select('*', { count: 'exact', head: true });
+
+  document.getElementById('totalWears').textContent = totalWears ?? 0;
+
+
+  /* TOP COLOR + STYLE */
+  const { data } = await client
+    .from('wear_history')
+    .select(`
+      panties (
+        color,
+        styles ( name )
+      )
+    `);
+
+  const colorCounts = {};
+  const styleCounts = {};
+
+  data.forEach(row => {
+    const p = row.panties;
+    if (!p) return;
+
+    if (p.color)
+      colorCounts[p.color] = (colorCounts[p.color] || 0) + 1;
+
+    if (Array.isArray(p.styles)) {
+      p.styles.forEach(s => {
+        if (s?.name)
+          styleCounts[s.name] = (styleCounts[s.name] || 0) + 1;
+      });
+    } else if (p.styles?.name) {
+      styleCounts[p.styles.name] =
+        (styleCounts[p.styles.name] || 0) + 1;
+    }
+  });
+
+  const topColor = Object.entries(colorCounts)
+    .sort((a,b)=>b[1]-a[1])[0]?.[0] || "--";
+
+  const topStyle = Object.entries(styleCounts)
+    .sort((a,b)=>b[1]-a[1])[0]?.[0] || "--";
+
+  document.getElementById('topColor').textContent = topColor;
+  document.getElementById('topStyle').textContent = topStyle;
+}
+
+/* ---------------------------
+   Initialize
+--------------------------- */
+loadKPIs();
 loadColorStats();
 loadStateStats();
 loadWearCounts();
