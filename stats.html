@@ -586,16 +586,17 @@ if (Array.isArray(p.fabrics)) {
   fabricCounts[p.fabrics.name] = (fabricCounts[p.fabrics.name] || 0) + 1;
 }
 
-    if (row.worn_at && p.color) {
-      const date = new Date(row.worn_at);
-      const yymm =
-        String(date.getFullYear()).slice(2) +
-        String(date.getMonth() + 1).padStart(2, '0');
+if (row.worn_at && p.color) {
+  const date = new Date(row.worn_at);
+  const yymm =
+    String(date.getFullYear()).slice(2) +
+    String(date.getMonth() + 1).padStart(2, '0');
 
-      const key = yymm + "-" + p.color;
-      colorMonthCounts[key] = (colorMonthCounts[key] || 0) + 1;
-    }
-  });
+  const key = yymm + "-" + p.color;
+  colorMonthCounts[key] = (colorMonthCounts[key] || 0) + 1;
+}
+
+// STYLE MONTH COUNTS
 if (row.worn_at) {
   const date = new Date(row.worn_at);
   const yymm =
@@ -611,13 +612,13 @@ if (row.worn_at) {
         (styleMonthCounts[key] || 0) + 1;
     });
   } else if (p.styles?.name) {
-
     const key = yymm + "-" + p.styles.name;
     styleMonthCounts[key] =
       (styleMonthCounts[key] || 0) + 1;
-
   }
 }
+  });
+
 
   renderSimpleTable("colorCountTable", colorCounts);
   renderSimpleTable("styleCountTable", styleCounts);
