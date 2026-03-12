@@ -260,7 +260,9 @@ function renderStyleMonthChart(counts) {
   const allStyles = new Set();
 
   Object.entries(counts).forEach(([key, count]) => {
-    const [yymm, style] = key.split("-");
+const parts = key.split("-");
+const yymm = parts[0];
+const style = parts.slice(1).join("-");
     const year = "20" + yymm.slice(0,2);
     const monthIndex = parseInt(yymm.slice(2,4)) - 1;
     const monthLabel = `${monthNames[monthIndex]} ${year}`;
@@ -278,12 +280,35 @@ function renderStyleMonthChart(counts) {
 
   const stylesArray = Array.from(allStyles);
 
-  const datasets = stylesArray.map(style => ({
+const styleColorMap = {
+  Thong: "#ff6fae",
+  Bikini: "#3498db",
+  Hipster: "#9b59b6",
+  Cheeky: "#e67e22",
+  Brief: "#27ae60",
+  Boyshort: "#1abc9c",
+  High-Waist: "#e74c3c",
+  High-Leg: "#f1c40f",
+  Hiphugger: "#8e44ad",
+  Tanga: "#2ecc71",
+  Brazilian: "#d35400",
+  Granny Panty: "#7f8c8d",
+  String Bikini: "#c0392b"
+};
+
+const datasets = stylesArray.map(style => {
+  const color = styleColorMap[style] || "#95a5a6";
+
+  return {
     label: style,
     data: sortedMonths.map(month =>
       monthStyleMap[month][style] || 0
-    )
-  }));
+    ),
+    backgroundColor: color,
+    borderColor: color,
+    borderWidth: 1
+  };
+});
 
   const ctx = document
     .getElementById('styleMonthChart')
