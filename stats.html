@@ -28,12 +28,71 @@
 .grid-2x2 > div {
   width: 100%;
 }
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;
+  margin:20px 0 30px 0;
+}
+
+.kpi-card{
+  background:#f8f9fb;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:18px;
+  text-align:center;
+}
+
+.kpi-value{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.kpi-label{
+  font-size:12px;
+  color:#666;
+  margin-top:4px;
+}
+.chart-card{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:20px;
+}
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(400px,1fr));
+  gap:30px;
+  margin-top:20px;
+}
   </style>
 </head>
 <body>
+<h1>Panty Drawer Stats</h1>
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value" id="totalPanties">--</div>
+    <div class="kpi-label">Panties in Drawer</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value" id="totalWears">--</div>
+    <div class="kpi-label">Total Wears Logged</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value" id="topColor">--</div>
+    <div class="kpi-label">Top Color</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-value" id="topStyle">--</div>
+    <div class="kpi-label">Top Style</div>
+  </div>
+</div>
 
 <h1>Mood & Wear Stats</h1>
-
+<div class="chart-card">
 <h2>Color by Day Rating</h2>
 <table id="colorTable">
   <thead>
@@ -45,7 +104,9 @@
   </thead>
   <tbody></tbody>
 </table>
+</div>
 
+<div class="chart-card">
 <h2>State by Day Rating</h2>
 <table id="stateTable">
   <thead>
@@ -57,6 +118,7 @@
   </thead>
   <tbody></tbody>
 </table>
+</div>
 
 <h1>Wear Counts</h1>
 
@@ -103,25 +165,38 @@
   </div>
 
 </div>
+
+<div class="chart-card">
 <h2>Color by Year-Month</h2>
 <canvas id="colorMonthChart" height="120"></canvas>
+</div>
 
+<div class="chart-card">
 <h2>Style by Year-Month</h2>
 <canvas id="styleMonthChart" height="120"></canvas>
+</div>
 
 <h1>Current Drawer Counts</h1>
 
+<div class="chart-card">
 <h2>Current Drawer Counts by Color</h2>
 <canvas id="drawerColorChart" height="120"></canvas>
+</div>
 
+<div class="chart-card">
 <h2>Current Drawer Counts by Style</h2>
 <canvas id="drawerStyleChart" height="120"></canvas>
+</div>
 
+<div class="chart-card">
 <h2>Current Drawer Counts by Brand</h2>
 <canvas id="drawerBrandChart" height="120"></canvas>
+</div>
 
+<div class="chart-card">
 <h2>Current Drawer Counts by Fabric</h2>
 <canvas id="drawerFabricChart" height="120"></canvas>
+</div>
 
 <script>
 const client = window.supabase.createClient(
