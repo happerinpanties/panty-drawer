@@ -164,19 +164,21 @@ function renderColorMonthChart(counts) {
     const [yymm, color] = key.split("-");
     const year = "20" + yymm.slice(0,2);
     const monthIndex = parseInt(yymm.slice(2,4)) - 1;
-    const monthLabel = `${monthNames[monthIndex]} ${year}`;
+const monthLabel = `${monthNames[monthIndex]} ${year}`;
 
-    if (!monthColorMap[monthLabel]) {
-      monthColorMap[monthLabel] = {};
-    }
-
-    monthColorMap[monthLabel][color] = count;
+if (!monthColorMap[yymm]) {
+  monthColorMap[yymm] = {
+    label: monthLabel,
+    colors: {}
+  };
+}
+monthColorMap[yymm].colors[color] = count;
     allColors.add(color);
   });
 
   // Sort months descending (most recent first)
-  const sortedMonths = Object.keys(monthColorMap)
-    .sort((a, b) => new Date(b) - new Date(a));
+const sortedMonths = Object.keys(monthColorMap)
+  .sort((a, b) => b - a);
 
   const colorsArray = Array.from(allColors);
 
@@ -201,7 +203,7 @@ const datasets = colorsArray.map(color => {
   return {
     label: color,
     data: sortedMonths.map(month => 
-      monthColorMap[month][color] || 0
+      monthColorMap[month].colors[color] || 0
     ),
     backgroundColor: bgColor,
     borderColor: bgColor,
@@ -218,7 +220,7 @@ const datasets = colorsArray.map(color => {
 window.colorMonthChartInstance = new Chart(ctx, {
   type: 'bar',
   data: {
-    labels: sortedMonths,
+labels: sortedMonths.map(m => monthColorMap[m].label),
     datasets: datasets
   },
   options: {
