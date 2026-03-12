@@ -269,16 +269,19 @@ const style = parts.slice(1).join("-");
     const monthIndex = parseInt(yymm.slice(2,4)) - 1;
     const monthLabel = `${monthNames[monthIndex]} ${year}`;
 
-    if (!monthStyleMap[monthLabel]) {
-      monthStyleMap[monthLabel] = {};
-    }
+if (!monthStyleMap[yymm]) {
+  monthStyleMap[yymm] = {
+    label: monthLabel,
+    styles: {}
+  };
+}
 
-    monthStyleMap[monthLabel][style] = count;
+monthStyleMap[yymm].styles[style] = count;
     allStyles.add(style);
   });
 
   const sortedMonths = Object.keys(monthStyleMap)
-    .sort((a, b) => new Date(b) - new Date(a));
+  .sort((a, b) => b - a)
 
   const stylesArray = Array.from(allStyles);
 
@@ -304,7 +307,7 @@ const datasets = stylesArray.map(style => {
   return {
     label: style,
     data: sortedMonths.map(month =>
-      monthStyleMap[month][style] || 0
+      monthStyleMap[month].styles[style] || 0
     ),
     backgroundColor: color,
     borderColor: color,
@@ -323,7 +326,7 @@ const datasets = stylesArray.map(style => {
   window.styleMonthChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: sortedMonths,
+      labels: sortedMonths.map(m => monthStyleMap[m].label),
       datasets: datasets
     },
     options: {
