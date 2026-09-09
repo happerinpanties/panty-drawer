@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add a Panty</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+<script type="module" src="/js/nav-auth.js"></script>
+<script type="module" src="/js/auth-gate.js"></script>
+  <link rel="manifest" href="/manifest.json" />
+<link rel="apple-touch-icon" href="/icons/icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="The Drawer" />
+<meta name="theme-color" content="#c9847a" />
+
+  <style>
+    :root {
+      --blush:   #f5e8e4;
+      --rose:    #c9847a;
+      --plum:    #6b3a45;
+      --ivory:   #fdf8f6;
+      --stone:   #8a7570;
+      --ink:     #2e1f22;
+      --border:  #e8d8d3;
+      --card-bg: #ffffff;
+      --nav-h:   64px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--ivory);
+      color: var(--ink);
+      font-weight: 300;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(253,248,246,0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+    }
+
+    .nav-wordmark {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--plum);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      list-style: none;
+      position: relative;
+    }
+
+    .nav-links > li { position: relative; }
+
+    .nav-links > li > a,
+    .nav-links > li > button {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-links > li > a:hover,
+    .nav-links > li > button:hover { color: var(--plum); }
+
+    .nav-links > li > a.active {
+      color: var(--plum);
+      border-bottom: 2px solid var(--rose);
+    }
+
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 1px);
+      right: 0;
+      min-width: 180px;
+      background: var(--ivory);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--rose);
+      box-shadow: 0 8px 24px rgba(107,58,69,0.08);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.18s, transform 0.18s;
+      list-style: none;
+    }
+
+    .nav-links > li:hover .dropdown,
+    .nav-links > li:focus-within .dropdown {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+
+    .dropdown li a {
+      display: block;
+      padding: 12px 20px;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--stone);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .dropdown li a:hover { background: var(--blush); color: var(--plum); }
+
+    .chevron { font-size: 9px; transition: transform 0.2s; }
+    .nav-links > li:hover .chevron { transform: rotate(180deg); }
+
+    .auth-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 8px;
+      padding-left: 16px;
+      border-left: 1px solid var(--border);
+    }
+
+    .auth-email {
+      font-size: 11px;
+      color: var(--stone);
+      letter-spacing: 0.04em;
+    }
+
+    .btn-text {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--rose);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      transition: color 0.2s;
+    }
+
+    .btn-text:hover { color: var(--plum); }
+
+    /* ── Page Header ─────────────────────────────────────────── */
+    .page-header {
+      text-align: center;
+      padding: 56px 24px 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-header .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 14px;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(34px, 5vw, 52px);
+      font-weight: 400;
+      color: var(--plum);
+      line-height: 1.15;
+    }
+
+    .page-header h1 em { font-style: italic; }
+
+    /* ── Layout ──────────────────────────────────────────────── */
+    .content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    /* ── Sign-in card ────────────────────────────────────────── */
+    .signin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--rose);
+      padding: 40px;
+      text-align: center;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .signin-card p {
+      font-size: 13px;
+      color: var(--stone);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .signin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    input[type="email"] {
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      background: var(--ivory);
+    }
+
+    input[type="email"]:focus { outline: none; border-color: var(--rose); }
+
+    .btn-primary {
+      background: var(--plum);
+      color: #fff;
+      border: none;
+      border-radius: 2px;
+      padding: 12px 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover { background: var(--rose); }
+    .btn-primary:disabled { background: var(--border); cursor: default; }
+
+    .signin-status {
+      font-size: 12px;
+      color: var(--stone);
+      margin-top: 14px;
+      min-height: 16px;
+    }
+
+    .signin-status.success { color: var(--plum); }
+    .signin-status.error { color: #a33; }
+
+    /* ── Form ────────────────────────────────────────────────── */
+    .panty-form {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--stone);
+    }
+
+    .form-label .optional {
+      text-transform: none;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+
+    input[type="text"], select, textarea {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 10px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      background: var(--ivory);
+      width: 100%;
+    }
+
+    select {
+      background: var(--ivory) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a7570'/%3E%3C/svg%3E") no-repeat right 14px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--rose);
+    }
+
+    textarea { resize: vertical; min-height: 60px; font-family: 'Inter', sans-serif; }
+
+    .new-value-row {
+      display: none;
+      margin-top: 6px;
+    }
+
+    .new-value-row.visible { display: block; }
+
+    /* ── Image upload ────────────────────────────────────────── */
+    .image-drop {
+      border: 1px dashed var(--border);
+      border-radius: 2px;
+      background: var(--blush);
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .image-drop:hover { border-color: var(--rose); }
+
+    .image-drop input[type="file"] {
+      display: none;
+    }
+
+    .image-drop-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--plum);
+    }
+
+    .image-drop-hint {
+      font-size: 11px;
+      color: var(--stone);
+      margin-top: 6px;
+    }
+
+    .image-preview-wrap {
+      display: none;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .image-preview-wrap.visible { display: block; }
+
+    .image-preview {
+      max-width: 220px;
+      max-height: 280px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      object-fit: cover;
+    }
+
+    .image-preview-meta {
+      font-size: 11px;
+      color: var(--stone);
+      margin-top: 8px;
+    }
+
+    .form-submit-row {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .form-status {
+      font-size: 12px;
+      color: var(--stone);
+    }
+
+    .form-status.success { color: var(--plum); }
+    .form-status.error { color: #a33; }
+
+    .locked-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--stone);
+      margin-top: 16px;
+      font-style: italic;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--stone);
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 0 16px; }
+      .content { padding: 24px 16px 60px; }
+      .panty-form { grid-template-columns: 1fr; padding: 20px; }
+      .auth-email { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-wordmark" href="https://www.panty-drawer.com">The Drawer</a>
+  <ul class="nav-links">
+    <li><a href="https://www.panty-drawer.com">Drawer</a></li>
+    <li>
+      <button aria-haspopup="true">Pages <span class="chevron">&#9662;</span></button>
+      <ul class="dropdown">
+        <li><a href="/stats">Panty Stats</a></li>
+        <li><a href="/hamper">Hamper</a></li>
+        <li><a href="/retired">Retired Panties</a></li>
+        <li><a href="/chopping-block">Chopping Block</a></li>
+        <li data-auth="required"><a href="/schedule">Wear Schedule</a></li>
+        <li data-auth="required"><a href="/mood">Mood</a></li>
+        <li data-auth="required"><a href="/yoga">Pantyboy Yoga</a></li>
+        <li data-auth="required"><a href="/add" class="active">Add Panty</a></li>
+      </ul>
+    </li>
+    <li class="auth-area" id="authArea"><!-- populated by nav-auth.js --></li>
+  </ul>
+</nav>
+
+<header class="page-header">
+  <p class="eyebrow">Grow the Collection</p>
+  <h1>Add a <em>Panty</em></h1>
+</header>
+
+<div class="content">
+
+  <!-- Signed-out state -->
+  <div id="signedOutSection" style="display:none;">
+    <div class="signin-card">
+      <p>Sign in to add a new item to the drawer.</p>
+      <form class="signin-form" id="signinForm">
+        <input type="email" id="signinEmail" placeholder="you@example.com" required />
+        <button type="submit" class="btn-primary">Send Magic Link</button>
+      </form>
+      <div class="signin-status" id="signinStatus"></div>
+    </div>
+  </div>
+
+  <!-- Signed-in state -->
+  <div id="signedInContent" style="display:none;">
+
+    <form class="panty-form" id="pantyForm">
+
+      <div class="form-group full">
+        <label class="form-label" for="nameInput">Name</label>
+        <input type="text" id="nameInput" required />
+      </div>
+
+      <div class="form-group full">
+        <label class="form-label">Photo</label>
+        <div class="image-drop" id="imageDropZone">
+          <input type="file" id="imageInput" accept="image/*" />
+          <div class="image-drop-label">Tap to choose a photo</div>
+          <div class="image-drop-hint">Camera or photo library — resized to 1000px wide automatically</div>
+        </div>
+        <div class="image-preview-wrap" id="imagePreviewWrap">
+          <img class="image-preview" id="imagePreview" alt="Preview" />
+          <div class="image-preview-meta" id="imagePreviewMeta"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="brandSelect">Brand <span class="optional">(optional)</span></label>
+        <select id="brandSelect">
+          <option value="">No brand</option>
+          <option value="__new__">+ Add new…</option>
+        </select>
+        <div class="new-value-row" id="brandNewRow">
+          <input type="text" id="brandNewInput" placeholder="New brand name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="styleSelect">Style <span class="optional">(optional)</span></label>
+        <select id="styleSelect">
+          <option value="">No style</option>
+          <option value="__new__">+ Add new…</option>
+        </select>
+        <div class="new-value-row" id="styleNewRow">
+          <input type="text" id="styleNewInput" placeholder="New style name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fabricSelect">Fabric <span class="optional">(optional)</span></label>
+        <select id="fabricSelect">
+          <option value="">No fabric</option>
+          <option value="__new__">+ Add new…</option>
+        </select>
+        <div class="new-value-row" id="fabricNewRow">
+          <input type="text" id="fabricNewInput" placeholder="New fabric name" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="colorInput">Color <span class="optional">(optional)</span></label>
+        <input type="text" id="colorInput" list="colorOptions" placeholder="e.g. Black" />
+        <datalist id="colorOptions"></datalist>
+      </div>
+
+      <div class="form-group full">
+        <label class="form-label" for="notesInput">Notes <span class="optional">(optional)</span></label>
+        <textarea id="notesInput"></textarea>
+      </div>
+
+      <div class="form-submit-row">
+        <button type="submit" class="btn-primary" id="submitBtn">Add to Drawer</button>
+        <span class="form-status" id="formStatus"></span>
+      </div>
+
+    </form>
+
+    <div class="locked-note" id="notAllowedNote" style="display:none;">
+      You're signed in, but this account isn't on the approved list for adding items yet.
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  &copy; The Drawer &nbsp;&middot;&nbsp; Add a Panty
+</footer>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const client = createClient(
+  'https://rkocfrsaeeyxgfdxeiqz.supabase.co',
+  'sb_publishable_yp7myP1S5wmYLQrgwNWxhg_IfZHdeZj'
+);
+
+const BUCKET = 'panty-images';
+const MAX_WIDTH = 1000;
+const JPEG_QUALITY = 0.85;
+
+let currentSession = null;
+let resizedBlob = null; // set once an image has been chosen + resized
+
+// ── Auth UI ─────────────────────────────────────────────────
+function renderAuthArea() {
+  const area = document.getElementById('authArea');
+  if (currentSession) {
+    area.innerHTML = `
+      <span class="auth-email">${currentSession.user.email}</span>
+      <button class="btn-text" id="signOutBtn">Sign Out</button>
+    `;
+    document.getElementById('signOutBtn').addEventListener('click', signOut);
+  } else {
+    area.innerHTML = `<a href="#" class="btn-text" id="navSignInLink">Sign In</a>`;
+    document.getElementById('navSignInLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('signedOutSection').scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+}
+
+function renderPageState() {
+  document.getElementById('signedOutSection').style.display = currentSession ? 'none' : 'block';
+  document.getElementById('signedInContent').style.display = currentSession ? 'block' : 'none';
+}
+
+document.getElementById('signinForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('signinEmail').value.trim();
+  const statusEl = document.getElementById('signinStatus');
+  statusEl.textContent = 'Sending...';
+  statusEl.className = 'signin-status';
+
+  const { error } = await client.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.href }
+  });
+
+  if (error) {
+    if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
+      statusEl.textContent = 'Too many attempts right now — please try again in a bit.';
+    } else {
+      statusEl.textContent = 'Something went wrong. Please try again.';
+    }
+    statusEl.className = 'signin-status error';
+    console.error('Sign-in error:', JSON.stringify(error));
+  } else {
+    statusEl.textContent = 'Check your email for a sign-in link.';
+    statusEl.className = 'signin-status success';
+  }
+});
+
+async function signOut() {
+  await client.auth.signOut();
+  currentSession = null;
+  renderAuthArea();
+  renderPageState();
+}
+
+// ── Lookup dropdowns ────────────────────────────────────────
+async function loadLookups() {
+  const [brandsRes, stylesRes, fabricsRes, colorsRes] = await Promise.all([
+    client.from('brands').select('id, name').order('name'),
+    client.from('styles').select('id, name').order('name'),
+    client.from('fabrics').select('id, name').order('name'),
+    client.from('panties').select('color'),
+  ]);
+
+  if (brandsRes.error) console.error('Brands error:', JSON.stringify(brandsRes.error));
+  if (stylesRes.error) console.error('Styles error:', JSON.stringify(stylesRes.error));
+  if (fabricsRes.error) console.error('Fabrics error:', JSON.stringify(fabricsRes.error));
+  if (colorsRes.error) console.error('Colors error:', JSON.stringify(colorsRes.error));
+
+  populateLookupSelect('brandSelect', brandsRes.data || [], 'No brand');
+  populateLookupSelect('styleSelect', stylesRes.data || [], 'No style');
+  populateLookupSelect('fabricSelect', fabricsRes.data || [], 'No fabric');
+
+  const colors = [...new Set((colorsRes.data || []).map(c => c.color))].filter(Boolean).sort();
+  const datalist = document.getElementById('colorOptions');
+  datalist.innerHTML = colors.map(c => `<option value="${c}"></option>`).join('');
+}
+
+function populateLookupSelect(id, options, placeholder) {
+  const el = document.getElementById(id);
+  const optionsHtml = options.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+  el.innerHTML = `<option value="">${placeholder}</option>${optionsHtml}<option value="__new__">+ Add new…</option>`;
+}
+
+// Wire up "+ Add new…" behavior for the three lookup dropdowns
+[
+  { selectId: 'brandSelect', rowId: 'brandNewRow', inputId: 'brandNewInput' },
+  { selectId: 'styleSelect', rowId: 'styleNewRow', inputId: 'styleNewInput' },
+  { selectId: 'fabricSelect', rowId: 'fabricNewRow', inputId: 'fabricNewInput' },
+].forEach(({ selectId, rowId, inputId }) => {
+  document.getElementById(selectId).addEventListener('change', (e) => {
+    const row = document.getElementById(rowId);
+    const isNew = e.target.value === '__new__';
+    row.classList.toggle('visible', isNew);
+    if (!isNew) document.getElementById(inputId).value = '';
+  });
+});
+
+// Resolves a lookup dropdown to an id, inserting a new row first if needed.
+// Returns { id, error }.
+async function resolveLookupId(table, selectId, inputId) {
+  const select = document.getElementById(selectId);
+  const value = select.value;
+
+  if (!value) return { id: null, error: null };
+
+  if (value !== '__new__') return { id: value, error: null };
+
+  const name = document.getElementById(inputId).value.trim();
+  if (!name) {
+    return { id: null, error: `Please enter a name for the new ${table.slice(0, -1)}, or pick an existing one.` };
+  }
+
+  const { data, error } = await client.from(table).insert({ name }).select('id').single();
+  if (error || !data) {
+    console.error(`${table} insert error:`, JSON.stringify(error));
+    return { id: null, error: `Could not create that ${table.slice(0, -1)} — it may already exist, or your account isn't approved.` };
+  }
+  return { id: data.id, error: null };
+}
+
+// ── Image handling ──────────────────────────────────────────
+function resizeImageToBlob(file, maxWidth, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not read image'));
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const targetWidth = Math.round(img.width * scale);
+        const targetHeight = Math.round(img.height * scale);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        canvas.toBlob((blob) => {
+          if (blob) resolve({ blob, width: targetWidth, height: targetHeight });
+          else reject(new Error('Could not create image blob'));
+        }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById('imageDropZone').addEventListener('click', () => {
+  document.getElementById('imageInput').click();
+});
+
+document.getElementById('imageInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const statusEl = document.getElementById('formStatus');
+  statusEl.textContent = 'Resizing image...';
+  statusEl.className = 'form-status';
+
+  try {
+    const { blob, width, height } = await resizeImageToBlob(file, MAX_WIDTH, JPEG_QUALITY);
+    resizedBlob = blob;
+
+    const previewUrl = URL.createObjectURL(blob);
+    document.getElementById('imagePreview').src = previewUrl;
+    document.getElementById('imagePreviewWrap').classList.add('visible');
+    document.getElementById('imagePreviewMeta').textContent =
+      `${width}×${height} · ${Math.round(blob.size / 1024)} KB`;
+
+    statusEl.textContent = '';
+  } catch (err) {
+    console.error('Resize error:', err);
+    statusEl.textContent = 'Could not process that image — try a different photo.';
+    statusEl.className = 'form-status error';
+    resizedBlob = null;
+  }
+});
+
+// ── Submit ──────────────────────────────────────────────────
+document.getElementById('pantyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!currentSession) return;
+
+  const statusEl = document.getElementById('formStatus');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const name = document.getElementById('nameInput').value.trim();
+  const color = document.getElementById('colorInput').value.trim();
+  const notes = document.getElementById('notesInput').value.trim();
+
+  if (!name) {
+    statusEl.textContent = 'Please enter a name.';
+    statusEl.className = 'form-status error';
+    return;
+  }
+  if (!resizedBlob) {
+    statusEl.textContent = 'Please choose a photo.';
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  statusEl.textContent = 'Saving...';
+  statusEl.className = 'form-status';
+
+  // Resolve/create lookup values
+  const [brandResult, styleResult, fabricResult] = await Promise.all([
+    resolveLookupId('brands', 'brandSelect', 'brandNewInput'),
+    resolveLookupId('styles', 'styleSelect', 'styleNewInput'),
+    resolveLookupId('fabrics', 'fabricSelect', 'fabricNewInput'),
+  ]);
+
+  const lookupError = brandResult.error || styleResult.error || fabricResult.error;
+  if (lookupError) {
+    submitBtn.disabled = false;
+    statusEl.textContent = lookupError;
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  // Generate the id client-side so it can double as the storage filename
+  const newId = crypto.randomUUID();
+  const storagePath = `${newId}.jpeg`;
+
+  const { error: uploadError } = await client.storage
+    .from(BUCKET)
+    .upload(storagePath, resizedBlob, { contentType: 'image/jpeg', upsert: false });
+
+  if (uploadError) {
+    console.error('Upload error:', JSON.stringify(uploadError));
+    submitBtn.disabled = false;
+    statusEl.textContent = 'Could not upload the photo — your account may not be approved, or something went wrong.';
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  const { data: publicUrlData } = client.storage.from(BUCKET).getPublicUrl(storagePath);
+  const imageUrl = publicUrlData.publicUrl;
+
+  const { data, error } = await client.from('panties').insert({
+    id: newId,
+    name,
+    brand_id: brandResult.id,
+    style_id: styleResult.id,
+    fabric_id: fabricResult.id,
+    color: color || null,
+    notes: notes || null,
+    image_url: imageUrl,
+    status: 'Clean',
+  }).select('id');
+
+  submitBtn.disabled = false;
+
+  if (error || !data || data.length === 0) {
+    console.error('Insert error:', JSON.stringify(error));
+    const isUniqueViolation = error?.code === '23505';
+    statusEl.textContent = isUniqueViolation
+      ? 'A panty with that name already exists — try a different name.'
+      : 'Could not save — your account may not be approved, or something went wrong.';
+    statusEl.className = 'form-status error';
+    return;
+  }
+
+  // Success — reset the form
+  statusEl.textContent = 'Added to the drawer!';
+  statusEl.className = 'form-status success';
+  document.getElementById('pantyForm').reset();
+  document.getElementById('imagePreviewWrap').classList.remove('visible');
+  document.getElementById('brandNewRow').classList.remove('visible');
+  document.getElementById('styleNewRow').classList.remove('visible');
+  document.getElementById('fabricNewRow').classList.remove('visible');
+  resizedBlob = null;
+  loadLookups();
+  setTimeout(() => { statusEl.textContent = ''; }, 2500);
+});
+
+// ── Init ────────────────────────────────────────────────────
+async function init() {
+  const { data: { session } } = await client.auth.getSession();
+  currentSession = session;
+  renderAuthArea();
+  renderPageState();
+  loadLookups();
+
+  client.auth.onAuthStateChange((_event, session) => {
+    currentSession = session;
+    renderAuthArea();
+    renderPageState();
+  });
+}
+
+init();
+</script>
+</body>
+</html>
